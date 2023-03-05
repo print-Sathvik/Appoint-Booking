@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content= "<%= csrfToken %>">
+    <link href="/css/styles.css" rel="stylesheet" />
+    <title>Appointment Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <%- include('header.ejs', {user: "admin"}) %>
+    <div class="grid grid-cols-7">
+        <div class="col-start-3 col-span-3">
+          <% if(messages && messages.error && messages.error.length > 0)  { %>
+            <% for(var i=0; i<messages.error.length; i++) { %>
+                    <p class="flash-error"> <%= messages.error[i] %></p>
+            <% } %>
+          <% } %>
+          <h2 class="centerElement text-xl py-2">You have the below appointments clashing with the current appointment. Do you want to <span style="color:red">replace</span> all of these with the new appointment or change the time slot of current event?</h2>
+          <div class="flex centerElement">
+            <form action="/replace" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <input type="hidden" name="organizerId" value="<%= organizerId %>" />
+                <a href="/appointment/<%= organizerId %>"><button type="button" class="bg-yellow-400 hover:bg-yellow-800 font-medium rounded px-4 py-2 mx-5 mr-20">Change Slot</button></a>
+                <input type="hidden" name="clashedIdsStr" value="<%= clashedIdsStr %>">
+                <button type="submit" class="floatRight text-white bg-red-600 hover:bg-red-800 font-medium rounded px-5 py-2 ml-20 cursor-pointer">Replace</button>
+            </form>
+          </div>
+        </div>
+        <table class="col-start-3 col-span-3 w-full">
+          <% for(var i=0; i < appointments.length; i++) { %>
+              <tr>
+                  <td width="5%" class="flex-auto py-4">
+                      <%= i+1%>.
+                  </td>
+                  <td width="40%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].title %></p>
+                  </td>
+                  <td width="25%" class="py-4 flex-none">
+                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= organizerNames[i] %></p>
+                  </td>
+                  <td width="25%" class="py-4 flex-none">
+                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].start.slice(0,5) %> - <%= appointments[i].end.slice(0,5) %></p>
+                  </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="3">
+                  <%= appointments[i].description %>
+                </td>
+              </tr>
+          <% } %>
+        </table>
+    </div>
+</body>
+</html>

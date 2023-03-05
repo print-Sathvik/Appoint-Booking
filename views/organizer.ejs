@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content= "<%= csrfToken %>">
+    <link href="/css/styles.css" rel="stylesheet" />
+    <title>Appointment Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <%- include('header.ejs', {user: "admin"}) %>
+    <div class="grid grid-cols-7">
+        <div class="col-start-3 col-span-3">
+          <% if(messages && messages.error && messages.error.length > 0)  { %>
+            <% for(var i=0; i<messages.error.length; i++) { %>
+                    <p class="flash-error"> <%= messages.error[i] %></p>
+            <% } %>
+          <% } %>
+          <% if(messages && messages.success && messages.success.length > 0)  { %>
+            <% for(var i=0; i<messages.success.length; i++) { %>
+                    <p class="flash-success"> <%= messages.success[i] %></p>
+            <% } %>
+          <% } %>
+          <h2 class="centerElement text-xl py-2">Welcome <%= name %></h2>
+        </div>
+        <table class="col-start-3 col-span-3 w-full">
+          <% for(var i=0; i < appointments.length; i++) { %>
+              <tr>
+                  <td width="5%" class="flex-auto py-4">
+                      <%= i+1%>.
+                  </td>
+                  <td width="40%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].title %></p>
+                  </td>
+                  <td width="25%" class="py-4 flex-none">
+                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= guestNames[i] %></p>
+                  </td>
+                  <td width="25%" class="py-4 flex-none">
+                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].start.slice(0,5) %> - <%= appointments[i].end.slice(0,5) %></p>
+                  </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="3">
+                  <%= appointments[i].description %>
+                </td>
+              </tr>
+          <% } %>
+        </table>
+    </div>
+</body>
+</html>

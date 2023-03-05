@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content= "<%= csrfToken %>">
+    <link href="/css/styles.css" rel="stylesheet" />
+    <title>Appointment Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <%- include('header.ejs', {user: "admin"}) %>
+    <div class="grid grid-cols-6">
+        <div class="col-start-3 col-span-2">
+          <form action="/appointment" method="post">
+            <% if(messages && messages.error && messages.error.length > 0)  { %>
+                <% for(var i=0; i<messages.error.length; i++) { %>
+                        <p class="flash-error"> <%= messages.error[i] %></p>
+                <% } %>
+              <% } %>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <input type="hidden" name="organizerId" value="<%= organizer.id %>" />
+            <div class="py-2">
+              <h3 class="text-xl centerElement">New appointment with <%= organizer.firstName + " " + organizer.lastName %></h3>
+              <h3 class="text-xl centerElement">Working Hours: <%= organizer.start.slice(0,5) + " - " + organizer.end.slice(0,5) %></h3>
+            </div>
+            <div class="py-4">
+                <div class="py-2">
+                    <span><label for="title">Title:</label>
+                    <input type="text" name="title" class="border border-gray-300 text-black-900 rounded p-2 w-fit"></span>
+                </div>
+                <div class="py-2">
+                  <span><label for="title">Date:</label>
+                  <input type="date" name="date" class="border border-gray-300 text-black-900 rounded p-2 w-fit"></span>
+                </div>
+                <div class="py-3"> 
+                  <label for="start">Timings: </label>
+                  <span>From <input type="time" name="start" required class="border border-gray-300 text-gray-900 rounded p-2 mx-3 w-half">
+                     to <input type="time" name="end" required class="border border-gray-300 text-gray-900 rounded p-2 mx-3 w-half"></span>
+                </div>
+                <div class="py-2">
+                    <label for="description">Description(Optional):</label>
+                    <textarea name="description" rows="4" placeholder="Describe appointment purpose here....." class="border border-gray-300 rounded text-black-900 w-full p-2 text-sm"></textarea>
+                </div>
+                <div class="py-3 centerElement"> 
+                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2">Create Appointment</button>        
+                </div>  
+            </div>
+        </div>
+    </div>
+</body>
+</html>
