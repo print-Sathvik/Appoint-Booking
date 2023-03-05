@@ -290,14 +290,31 @@ app.get('/organizer/dashboard', connectEnsureLogin.ensureLoggedIn({ redirectTo: 
     return response.redirect(request.headers.referer);
   }
   const appointments = await Appointment.findAll({ where: { organizerId: request.user.id } })
-  const guestNames = []
+  const guestNames1 = []
+  const guestNames2 = []
+  const now = new Date()
+  const upcoming = []
+  const completed = []
+  let apptDate
+  appointments.sort(function (a, b) {
+    return ((a.start < b.start) ? -1 : ((a.start > b.start) ? 1 : 0))
+  })
   for (let i = 0; i < appointments.length; i++) {
     const guest = await Guest.findByPk(appointments[i].guestId)
-    guestNames.push(guest.firstName + " " + guest.lastName)
+    apptDate = new Date(appointments[i].date + "T" + appointments[i].start)
+    if (apptDate.getTime() >= now.getTime()) {
+      upcoming.push(appointments[i])
+      guestNames1.push(guest.firstName + " " + guest.lastName)
+    } else {
+      completed.push(appointments[i])
+      guestNames2.push(guest.firstName + " " + guest.lastName)
+    }
   }
   response.render('organizer', {
-    appointments,
-    guestNames,
+    upcoming,
+    completed,
+    guestNames1,
+    guestNames2,
     name: request.user.firstName,
     csrfToken: request.csrfToken()
   });
@@ -309,14 +326,31 @@ app.get('/dashboard', connectEnsureLogin.ensureLoggedIn(), async (request, respo
     return response.redirect(request.headers.referer);
   }
   const appointments = await Appointment.findAll({ where: { guestId: request.user.id } })
-  const organizerNames = []
+  const organizerNames1 = []
+  const organizerNames2 = []
+  const now = new Date()
+  const upcoming = []
+  const completed = []
+  let apptDate
+  appointments.sort(function (a, b) {
+    return ((a.start < b.start) ? -1 : ((a.start > b.start) ? 1 : 0))
+  })
   for (let i = 0; i < appointments.length; i++) {
     const organizer = await Organizer.findByPk(appointments[i].organizerId)
-    organizerNames.push(organizer.firstName + " " + organizer.lastName)
+    apptDate = new Date(appointments[i].date + "T" + appointments[i].start)
+    if (apptDate.getTime() >= now.getTime()) {
+      upcoming.push(appointments[i])
+      organizerNames1.push(organizer.firstName + " " + organizer.lastName)
+    } else {
+      completed.push(appointments[i])
+      organizerNames2.push(organizer.firstName + " " + organizer.lastName)
+    }
   }
   response.render('guest', {
-    appointments,
-    organizerNames,
+    upcoming,
+    completed,
+    organizerNames1,
+    organizerNames2,
     name: request.user.firstName,
     csrfToken: request.csrfToken()
   });
@@ -345,30 +379,55 @@ app.post('/appointment', connectEnsureLogin.ensureLoggedIn(), async (request, re
     return response.redirect(request.headers.referer);
   }
   try {
+    const organizerId = request.body.organizerId
     if (request.body.start >= request.body.end) {
       request.flash("error", "End time should be after start time")
-      return response.redirect(`/appointment/${request.body.organizerId}`)
+      return response.redirect(`/appointment/${organizerId}`)
     }
-    const organizer = await Organizer.findByPk(request.body.organizerId)
-    if (request.body.start < organizer.start || request.body.end > organizer.end) {
-      request.flash("error", "The organizer does not take appintments at that time. Please select from the working hours specified.")
-      return response.redirect(`/appointment/${request.body.organizerId}`)
+    const organizer = await Organizer.findByPk(organizerId)
+    if (request.body.start < organizer.start.slice(0, 5) || request.body.end > organizer.end.slice(0, 5)) {
+      request.flash("error", "The organizer does not take appointments at that time. Please select from the working hours specified.")
+      return response.redirect(`/appointment/${organizerId}`)
     }
-    const organizerClashes = await Appointment.getOrganizerClashes(request.body.organizerId, request.body.date, request.body.start, request.body.end)
-    console.log("++++++++++++++++", organizerClashes)
+    const organizerClashes = await Appointment.getOrganizerClashes(organizerId, request.body.date, request.body.start, request.body.end)
     if (organizerClashes.length > 0) {
-      request.flash("error", "The organizer has some other appointments at this slot. Please choose a different slot.")
+      // Finding free slot
+      const organizerAppts = await Appointment.findAll({ attributes: ['start', 'end'], where: { organizerId, date: request.body.date } })
+      const guestAppts = await Appointment.findAll({ attributes: ['start', 'end'], where: { guestId: request.user.id, date: request.body.date } })
+      let temp = []
+      const allSlots = []
+      for (let i = 0; i < organizerAppts.length; i++) {
+        temp = [organizerAppts[i].start.slice(0, 5), organizerAppts[i].end.slice(0, 5)]
+        allSlots.push(temp)
+      }
+      for (let i = 0; i < guestAppts.length; i++) {
+        temp = [guestAppts[i].start.slice(0, 5), guestAppts[i].end.slice(0, 5)]
+        allSlots.push(temp)
+      }
+      allSlots.push([organizer.end.slice(0, 5), organizer.end.slice(0, 5)])
+      allSlots.sort(function (a, b) {
+        return ((a[0] < b[0]) ? -1 : ((a[0] > b[0]) ? 1 : 0))
+      })
+      const duration = (new Date("2023-03-06" + "T" + request.body.end)).getTime() - (new Date("2023-03-06" + "T" + request.body.start)).getTime()
+      console.log("#########################", duration, allSlots)
+      const freeSlot = await Appointment.freeSlot(duration, allSlots)
+      let message
+      if (freeSlot) {
+        message = `The closest slot available after your selected slot is ${freeSlot.start} - ${freeSlot.end}`
+      } else {
+        message = 'There are no free slots available today after your slot.'
+      }
+      request.flash("error", "The organizer has some other appointments at this slot. Please choose a different slot. " + message)
       return response.redirect(`/appointment/${request.body.organizerId}`)
     }
 
     const guestClashes = await Appointment.getGuestClashes(request.user.id, request.body.date, request.body.start, request.body.end)
     console.log("**************", guestClashes)
     if (guestClashes.length > 0) {
-      global.clashObj = {title: request.body.title, description: request.body.description, date: request.body.date, start: request.body.start, end: request.body.end, organizerId: request.body.organizerId }
+      global.clashObj = { title: request.body.title, description: request.body.description, date: request.body.date, start: request.body.start, end: request.body.end, organizerId: request.body.organizerId }
       return response.redirect('/clash')
     }
     await Appointment.addAppointment(request.body.organizerId, request.user.id, request.body.title, request.body.description, request.body.date, request.body.start, request.body.end)
-
     request.flash("success", "Appointment confirmed")
     return response.redirect("/dashboard")
   } catch (error) {
@@ -382,7 +441,34 @@ app.get('/clash', connectEnsureLogin.ensureLoggedIn(), async (request, response)
     request.flash("error", "Appointers cannot access that page")
     return response.redirect(request.headers.referer)
   }
+  const organizerId = global.clashObj.organizerId
+  const organizer = await Organizer.findByPk(organizerId)
   const guestClashes = await Appointment.getGuestClashes(request.user.id, global.clashObj.date, global.clashObj.start, global.clashObj.end)
+  const organizerAppts = await Appointment.findAll({ attributes: ['start', 'end'], where: { organizerId, date: global.clashObj.date } })
+  const guestAppts = await Appointment.findAll({ attributes: ['start', 'end'], where: { guestId: request.user.id, date: global.clashObj.date } })
+  let temp = []
+  const allSlots = []
+  for (let i = 0; i < organizerAppts.length; i++) {
+    temp = [organizerAppts[i].start.slice(0, 5), organizerAppts[i].end.slice(0, 5)]
+    allSlots.push(temp)
+  }
+  for (let i = 0; i < guestAppts.length; i++) {
+    temp = [guestAppts[i].start.slice(0, 5), guestAppts[i].end.slice(0, 5)]
+    allSlots.push(temp)
+  }
+  allSlots.push([organizer.end.slice(0, 5), organizer.end.slice(0, 5)])
+  allSlots.sort(function (a, b) {
+    return ((a[0] < b[0]) ? -1 : ((a[0] > b[0]) ? 1 : 0))
+  })
+  const duration = (new Date("2023-03-06" + "T" + global.clashObj.end)).getTime() - (new Date("2023-03-06" + "T" + global.clashObj.start)).getTime()
+  console.log("#########################", duration, allSlots)
+  const freeSlot = await Appointment.freeSlot(duration, allSlots)
+  let message
+  if (freeSlot) {
+    message = `The closest slot available after your selected slot is ${freeSlot.start} - ${freeSlot.end}`
+  } else {
+    message = 'There are no free slots available today after your slot.'
+  }
   console.log("**************", guestClashes)
   const organizerNames = []
   for (let i = 0; i < guestClashes.length; i++) {
@@ -398,6 +484,7 @@ app.get('/clash', connectEnsureLogin.ensureLoggedIn(), async (request, response)
     organizerNames,
     clashedIdsStr: appointmentsStr,
     organizerId: global.clashObj.organizerId,
+    message,
     csrfToken: request.csrfToken()
   })
 })

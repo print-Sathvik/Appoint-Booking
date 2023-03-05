@@ -19,6 +19,7 @@
             <% } %>
           <% } %>
           <h2 class="centerElement text-xl py-2">You have the below appointments clashing with the current appointment. Do you want to <span style="color:red">replace</span> all of these with the new appointment or change the time slot of current event?</h2>
+          <h2 class="centerElement text-xl py-2">By considering today's appointments of your Organizer and yours, the closest slot after your selected slot is <%= message %></h2>
           <div class="flex centerElement">
             <form action="/replace" method="post">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />

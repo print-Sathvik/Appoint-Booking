@@ -24,31 +24,58 @@
             <% } %>
           <% } %>
           <h2 class="centerElement text-xl py-2">Welcome <%= name %></h2>
+          <h2 class="centerElement text-2xl py-2 bg-green-600 text-white">Upcoming Appointments</h2>
+          <table class="col-start-3 col-span-3 w-full">
+            <% for(var i=0; i < upcoming.length; i++) { %>
+                <tr>
+                    <td width="5%" class="flex-auto py-4">
+                        <%= i+1%>.
+                    </td>
+                    <td width="40%" class="py-4 flex-none">
+                        <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= upcoming[i].title %></p>
+                    </td>
+                    <td width="25%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= guestNames1[i] %></p>
+                    </td>
+                    <td width="20%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= upcoming[i].date %> <%= upcoming[i].start.slice(0,5) %> - <%= upcoming[i].end.slice(0,5) %></p>
+                    </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td colspan="3">
+                    <%= upcoming[i].description %>
+                  </td>
+                </tr>
+            <% } %>
+          </table>
+
+          <h2 class="centerElement text-2xl py-2 mt-5 bg-red-600 text-white">Past Appointments</h2>
+          <table class="col-start-3 col-span-3 w-full">
+            <% for(var i=0; i < completed.length; i++) { %>
+                <tr>
+                    <td width="5%" class="flex-auto py-4">
+                        <%= i+1%>.
+                    </td>
+                    <td width="40%" class="py-4 flex-none">
+                        <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= completed[i].title %></p>
+                    </td>
+                    <td width="25%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= guestNames2[i] %></p>
+                    </td>
+                    <td width="20%" class="py-4 flex-none">
+                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= completed[i].date %> <%= completed[i].start.slice(0,5) %> - <%= completed[i].end.slice(0,5) %></p>
+                    </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td colspan="3">
+                    <%= completed[i].description %>
+                  </td>
+                </tr>
+            <% } %>
+          </table>
         </div>
-        <table class="col-start-3 col-span-3 w-full">
-          <% for(var i=0; i < appointments.length; i++) { %>
-              <tr>
-                  <td width="5%" class="flex-auto py-4">
-                      <%= i+1%>.
-                  </td>
-                  <td width="40%" class="py-4 flex-none">
-                      <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].title %></p>
-                  </td>
-                  <td width="25%" class="py-4 flex-none">
-                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= guestNames[i] %></p>
-                  </td>
-                  <td width="25%" class="py-4 flex-none">
-                    <p class="ml-2 text-xl text-black-600 cursor-pointer"><%= appointments[i].start.slice(0,5) %> - <%= appointments[i].end.slice(0,5) %></p>
-                  </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td colspan="3">
-                  <%= appointments[i].description %>
-                </td>
-              </tr>
-          <% } %>
-        </table>
     </div>
 </body>
 </html>
