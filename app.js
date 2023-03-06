@@ -311,10 +311,12 @@ app.get('/organizer/dashboard', connectEnsureLogin.ensureLoggedIn({ redirectTo: 
     }
   }
   response.render('organizer', {
+    organizerId: request.user.id,
     upcoming,
     completed,
     guestNames1,
     guestNames2,
+    host: request.headers.host,
     name: request.user.firstName,
     csrfToken: request.csrfToken()
   });
@@ -390,6 +392,7 @@ app.post('/appointment', connectEnsureLogin.ensureLoggedIn(), async (request, re
       return response.redirect(`/appointment/${organizerId}`)
     }
     const organizerClashes = await Appointment.getOrganizerClashes(organizerId, request.body.date, request.body.start, request.body.end)
+    console.log("Came to org clash", organizerClashes)
     if (organizerClashes.length > 0) {
       // Finding free slot
       const organizerAppts = await Appointment.findAll({ attributes: ['start', 'end'], where: { organizerId, date: request.body.date } })
@@ -461,7 +464,6 @@ app.get('/clash', connectEnsureLogin.ensureLoggedIn(), async (request, response)
     return ((a[0] < b[0]) ? -1 : ((a[0] > b[0]) ? 1 : 0))
   })
   const duration = (new Date("2023-03-06" + "T" + global.clashObj.end)).getTime() - (new Date("2023-03-06" + "T" + global.clashObj.start)).getTime()
-  console.log("#########################", duration, allSlots)
   const freeSlot = await Appointment.freeSlot(duration, allSlots)
   let message
   if (freeSlot) {
@@ -521,7 +523,7 @@ app.post('/appointment/edit/:id', connectEnsureLogin.ensureLoggedIn(), async (re
   response.redirect('/dashboard');
 })
 
-app.delete('/appointment/:id', connectEnsureLogin.ensureLoggedIn(), async (request, response) => {
+app.delete('/appointment', connectEnsureLogin.ensureLoggedIn(), async (request, response) => {
   if (request.user.userType === 'organizer') {
     request.flash("error", "Appointers cannot access that page");
     return response.redirect(request.headers.referer);

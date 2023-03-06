@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content= "<%= csrfToken %>">
+    <meta name="csrf-token" content="<%= csrfToken %>">
     <link href="/css/styles.css" rel="stylesheet" />
     <title>Appointment Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,7 +22,7 @@
 
       function deleteAppointment(id)
       {
-          fetch(`/appointment/${id}`, {
+          fetch(`/appointment`, {
                 method: "delete",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
@@ -54,6 +54,7 @@
             <% } %>
           <% } %>
           <div class="flex gap-2 py-4">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
               <div class="flex-auto mx-2 my-3">
                 <input type="text" name="organizerId" id="organizerId" placeholder="Organizer ID" class="border border-gray-300 rounded text-gray-900 w-full p-1" required/>
               </div>
