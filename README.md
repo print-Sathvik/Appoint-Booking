@@ -1,3 +1,8 @@
+# Video Demonstartion
+**Video 1: https://www.loom.com/share/fa6bd374499e4a8e8f93312e2dfe9344**
+
+**Video 2: https://www.loom.com/share/972a21b1dd2644ddbb0dd0283844216f**
+
 # Appointment Booking Web Application(All 6 features)
 A website built using Nodejs, Express and sequelize for Postgresql for booking appointments. There are 2 types of users - Organizer(who hosts events) and Guest (who books appointments)
 
