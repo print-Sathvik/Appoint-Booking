@@ -88,20 +88,22 @@ describe("Appointment Booking Tests", function () {
     await login(agent, "testuser@testmail.com", "testpassword123");
     let res = await agent.get("/dashboard");
     let csrfToken = extractCsrfToken(res);
-    const guest = await Guest.findOne({where: { email: 'testuser@testmail.com' }})
-    const organizer = await Organizer.findOne()
-    const appointmentCount = await Appointment.count()
+    const guest = await Guest.findOne({
+      where: { email: "testuser@testmail.com" },
+    });
+    const organizer = await Organizer.findOne();
+    const appointmentCount = await Appointment.count();
     const response = await agent.post("/appointment").send({
       title: "Appointment 1",
       description: "Anything about the appointment",
       organizerId: organizer.id,
       guestId: guest.id,
-      date: new Date().toISOString().slice(0,10),
+      date: new Date().toISOString().slice(0, 10),
       start: "09:00",
       end: "09:30",
-      _csrf: csrfToken
+      _csrf: csrfToken,
     });
-    const newCount = await Appointment.count()
+    const newCount = await Appointment.count();
     expect(newCount).toBe(appointmentCount + 1);
     expect(response.statusCode).toBe(302);
   });
@@ -111,20 +113,22 @@ describe("Appointment Booking Tests", function () {
     await login(agent, "testuser@testmail.com", "testpassword123");
     let res = await agent.get("/dashboard");
     let csrfToken = extractCsrfToken(res);
-    const guest = await Guest.findOne({where: { email: 'testuser@testmail.com' }})
-    const organizer = await Organizer.findOne()
-    const appointmentCount = await Appointment.count()
+    const guest = await Guest.findOne({
+      where: { email: "testuser@testmail.com" },
+    });
+    const organizer = await Organizer.findOne();
+    const appointmentCount = await Appointment.count();
     const response = await agent.post("/appointment").send({
       title: "Appointment 3",
       description: "Anything about the appointment",
       organizerId: organizer.id,
       guestId: guest.id,
-      date: new Date().toISOString().slice(0,10),
+      date: new Date().toISOString().slice(0, 10),
       start: "09:10",
       end: "09:30",
-      _csrf: csrfToken
+      _csrf: csrfToken,
     });
-    const newCount = await Appointment.count()
+    const newCount = await Appointment.count();
     expect(newCount).toBe(appointmentCount);
     expect(response.statusCode).toBe(302);
   });
@@ -134,22 +138,65 @@ describe("Appointment Booking Tests", function () {
     await login(agent, "testuser@testmail.com", "testpassword123");
     let res = await agent.get("/dashboard");
     let csrfToken = extractCsrfToken(res);
-    const guest = await Guest.findOne({where: { email: 'testuser@testmail.com' }})
-    const organizer = await Organizer.findOne()
-    const appointmentCount = await Appointment.count()
+    const guest = await Guest.findOne({
+      where: { email: "testuser@testmail.com" },
+    });
+    const organizer = await Organizer.findOne();
+    const appointmentCount = await Appointment.count();
     const response = await agent.post("/appointment").send({
       title: "Appointment 4",
       description: "Anything about the appointment",
       organizerId: organizer.id,
       guestId: guest.id,
-      date: new Date().toISOString().slice(0,10),
+      date: new Date().toISOString().slice(0, 10),
       start: "04:30",
       end: "09:40",
-      _csrf: csrfToken
+      _csrf: csrfToken,
     });
-    const newCount = await Appointment.count()
+    const newCount = await Appointment.count();
     expect(newCount).toBe(appointmentCount);
     expect(response.statusCode).toBe(302);
+  });
+
+  test("Editing an appointment", async () => {
+    const agent = request.agent(server);
+    await login(agent, "testuser@testmail.com", "testpassword123");
+    let res = await agent.get("/dashboard");
+    let csrfToken = extractCsrfToken(res);
+    const guest = await Guest.findOne({
+      where: { email: "testuser@testmail.com" },
+    });
+    const organizer = await Organizer.findOne();
+    const appointmentCount = await Appointment.count();
+    await agent.post("/appointment").send({
+      title: "Old title",
+      description: "Old sescription",
+      organizerId: organizer.id,
+      guestId: guest.id,
+      date: new Date().toISOString().slice(0, 10),
+      start: "11:30",
+      end: "11:45",
+      _csrf: csrfToken,
+    });
+    const newCount = await Appointment.count();
+    expect(newCount).toBe(appointmentCount + 1);
+
+    let appointments = await Appointment.findAll();
+    let appointment = appointments[newCount - 1];
+    res = await agent.get("/dashboard");
+    csrfToken = extractCsrfToken(res);
+    const DeleteResponse = await agent
+      .post(`/appointment/edit/${appointment.id}`)
+      .send({
+        title: "Edited Title",
+        description: "Edited Description",
+        _csrf: csrfToken,
+      });
+    const countAfterEdit = await Appointment.count();
+    appointment = await Appointment.findByPk(appointment.id);
+    expect(countAfterEdit).toBe(newCount);
+    expect(appointment.title).toBe("Edited Title");
+    expect(appointment.description).toBe("Edited Description");
   });
 
   test("Delete an appointment", async () => {
@@ -157,30 +204,32 @@ describe("Appointment Booking Tests", function () {
     await login(agent, "testuser@testmail.com", "testpassword123");
     let res = await agent.get("/dashboard");
     let csrfToken = extractCsrfToken(res);
-    const guest = await Guest.findOne({where: { email: 'testuser@testmail.com' }})
-    const organizer = await Organizer.findOne()
-    const appointmentCount = await Appointment.count()
+    const guest = await Guest.findOne({
+      where: { email: "testuser@testmail.com" },
+    });
+    const organizer = await Organizer.findOne();
+    const appointmentCount = await Appointment.count();
     await agent.post("/appointment").send({
       title: "Appointment 2",
       description: "Anything about the appointment",
       organizerId: organizer.id,
       guestId: guest.id,
-      date: new Date().toISOString().slice(0,10),
+      date: new Date().toISOString().slice(0, 10),
       start: "09:30",
       end: "09:45",
-      _csrf: csrfToken
+      _csrf: csrfToken,
     });
-    const newCount = await Appointment.count()
+    const newCount = await Appointment.count();
     expect(newCount).toBe(appointmentCount + 1);
 
-    const appointment = await Appointment.findOne()
+    const appointment = await Appointment.findOne();
     res = await agent.get("/dashboard");
     csrfToken = extractCsrfToken(res);
-    const DeleteResponse = await agent.delete('/appointment').send({
+    const DeleteResponse = await agent.delete("/appointment").send({
       id: appointment.id,
       _csrf: csrfToken,
     });
-    const countAfterDelete = await Appointment.count()
+    const countAfterDelete = await Appointment.count();
     expect(countAfterDelete).toBe(newCount - 1);
   });
 });
