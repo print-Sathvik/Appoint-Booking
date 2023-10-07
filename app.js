@@ -63,7 +63,7 @@ passport.use(
           }
         })
         .catch(() => {
-          return done(null, false, { message: "Organiser does not exist" });
+          return done(null, false, { message: "Doctor does not exist" });
         });
     }
   )
