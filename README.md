@@ -1,26 +1,58 @@
-# Video Demonstartion
+# Doctor Appointment Application
 
-**Video 1: https://www.loom.com/share/fa6bd374499e4a8e8f93312e2dfe9344**
+A user-friendly application built using Node.js and Sequelize to help users book doctor appointments with ease.
 
-**Video 2: https://www.loom.com/share/972a21b1dd2644ddbb0dd0283844216f**
+## Features
 
-# Appointment Booking Web Application(All 6 features)
+- **User Authentication**: Register and log in.
+- **Doctor's Schedule Viewer**: View available time slots.
+- **Appointment Booking**: Book, reschedule, or cancel appointments.
+- **Notifications**: Reminders for upcoming appointments.
+- **Admin Panel**: Manage doctors and their schedules.
 
-A website built using Nodejs, Express and sequelize for Postgresql for booking appointments. There are 2 types of users - Organizer(who hosts events) and Guest (who books appointments)
+## Prerequisites
 
-# Organizer
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+- [Sequelize CLI](https://github.com/sequelize/cli)
+- A relational database (e.g., MySQL, PostgreSQL)
 
-- Should sign up to get a unique ID and link using which guests can book appointments.
-- Will have to set working hours.
-- Can see all upcoming and past appointment details - title, user who booked it, description/purpose, date and time
+## Installation
 
-# Guest
+1. **Clone the Repository**:
+        git clone https://github.com/KrishnaRishi2208/Appoint-Booking
 
-- Should sign up first to book any appointment
-- Enter unique ID shared by the Organizer or visit the URL of the Organizer to be able to book appointments for that organizer.
-- Time slot and duration is customizable by the guest.
-- Cannot book an appointment outside the working hours of an Organizer.
-- If there is clash with any of the Organizer's appointments with other people, then the nearest time slot after the guest's required slot which has the same duration as required by that guest is suggested.
-- If there is any clash in timeslot with other appointments of the guest, then the guest is shown the conflicts and given an option to replace all the conflicting appointments with the new one. Also he is suggested with the nearest timeslot with same duration based on availability of both the Organizer and the Guest to chose it or the guest can proceed to chose some other slot
-- Can edit an appointment except timings
-- Can delete an appointment
+3. **Install Dependencies**:
+        npm install package.json
+
+5. **Setup Database**:
+- Update the `.env` file with your database details.
+- Run migrations:
+  ```
+  sequelize db:migrate
+  ```
+
+4. **Start the Application**:
+
+Visit `http://localhost:3000` to access the application.
+
+## Usage
+
+1. **Registration and Login**: Register as a new user or log in if you're already registered.
+2. **Browse Doctor Schedules**: View available time slots and choose a convenient time.
+3. **Manage Appointments**: View, book, reschedule, or cancel your appointments.
+
+## Contributing
+
+Contributions are welcomed. Here's how to contribute:
+
+- Fork the repo.
+- Create a new feature branch.
+- Make changes and commit them.
+- Push to your branch.
+- Open a pull request.
+
+## License
+
+This project is licensed under the MIT License. Refer to the `LICENSE` file for more details.
+
